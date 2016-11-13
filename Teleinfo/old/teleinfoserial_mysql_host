@@ -1,0 +1,7 @@
+
+logger -t "teleinfoserial_mysql_host" "Teleinfo process starting"
+until /home/pi/teleinfoserial_mysql > /home/pi/teleinfo_log; do
+    echo "Server 'teleinfoserial_mysql' crashed with exit code $?.  Respawning.." >&2
+logger -t "teleinfoserial_mysql_host" "Teleinfo process crashed with exit code $?. Restarting !"
+    sleep 1
+done

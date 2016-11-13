@@ -1,0 +1,17 @@
+0	1	mikroCPIC1618.exe -MSF -DBG -pP18F26K22 -DL -O11111114 -fo8 -N"C:\Users\gubraux\Documents\Perso - Admin\Electronique\EASYPIC\Projets\UART\UART.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" -SP"C:\Users\gubraux\Documents\Perso - Admin\Electronique\EASYPIC\Projets\UART\" -SP"C:\Users\gubraux\Desktop\DK\Perso\Electronique\EASYPIC\Projets\UART\" "UART.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_CType.mcl" "__Lib_CString.mcl" "__Lib_CStdlib.mcl" "__Lib_CMath.mcl" "__Lib_MemManager.mcl" "__Lib_Conversions.mcl" "__Lib_Sprinti.mcl" "__Lib_Sprintl.mcl" "__Lib_Time.mcl" "__Lib_Trigonometry.mcl" "__Lib_Button.mcl" "__Lib_Keypad4x4.mcl" "__Lib_Manchester.mcl" "__Lib_OneWire.mcl" "__Lib_PS2.mcl" "__Lib_Sound.mcl" "__Lib_SoftI2C.mcl" "__Lib_SoftSPI.mcl" "__Lib_SoftUART.mcl" "__Lib_ADC_K22.mcl" "__Lib_EEPROM_1024.mcl" "__Lib_UART_c67b67.mcl" "__Lib_CF.mcl" "__Lib_GlcdFonts.mcl" "__Lib_Glcd.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl" "__Lib_RS485.mcl" "__Lib_S1D13700.mcl" "__Lib_T6963C.mcl"	 
+warning: 0	1501	Specified search path does not exist: 'C:\Users\gubraux\Desktop\DK\Perso\Electronique\EASYPIC\Projets\UART'	 
+hint: 0	1139	Available RAM: 3875 [bytes], Available ROM: 65536 [bytes]	 
+diagnostics: 0	126	All files Preprocessed in 47 ms	 
+diagnostics: 0	122	Compilation Started	UART.c
+hint: 606	1163	Variable 'temp_res' has been declared, but not used	UART.c
+hint: 610	1163	Variable 'Temp_F' has been declared, but not used	UART.c
+diagnostics: 716	123	Compiled Successfully	UART.c
+hint: 610	1164	Variable 'ADC_Value' has been eliminated by optimizer	UART.c
+hint: 604	1164	Variable 'adc_val' has been eliminated by optimizer	UART.c
+diagnostics: 0	127	All files Compiled in 78 ms	 
+hint: 0	1144	Used RAM (bytes): 2633 (68%)  Free RAM (bytes): 1242 (32%)	Used RAM (bytes): 2633 (68%)  Free RAM (bytes): 1242 (32%)
+hint: 0	1144	Used ROM (bytes): 6448 (10%)  Free ROM (bytes): 59088 (90%)	Used ROM (bytes): 6448 (10%)  Free ROM (bytes): 59088 (90%)
+diagnostics: 0	125	Project Linked Successfully	UART.mcppi
+diagnostics: 0	128	Linked in 109 ms	 
+diagnostics: 0	129	Project 'UART.mcppi' completed: 312 ms	 
+diagnostics: 0	103	Finished successfully: 26 déc. 2015, 15:19:58	UART.mcppi
