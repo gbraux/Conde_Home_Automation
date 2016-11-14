@@ -1,0 +1,53 @@
+Zone 1 Moon
+[00] {590} 55 7f 7b 0e ca aa ca ad d5 55 7e 2b ff c0 42 78 9a aa 9a a9 15 55 40 ea 00 1f de c3 b2 aa b2 ab 75 55 5f 8a ff f0 10 9e 26 aa a6 aa 45 55 50 3a 80 07 f7 b0 ec aa ac aa dd 55 57 e2 bf fc 04 27 89 aa a9 aa 91 55 54 0e a0 00
+[00] {590} 55 7f 7b 0e ca aa ca ad 95 0a 81 d1 ff c0 42 78 9a aa 9a a9 35 7a bf 17 00 1f de c3 b2 aa b2 ab 65 42 a0 74 7f f0 10 9e 26 aa a6 aa 4d 5e af c5 c0 07 f7 b0 ec aa ac aa d9 50 a8 1d 1f fc 04 27 89 aa a9 aa 93 57 ab f1 70 00
+
+Zone 1 Sun
+[00] {590} 55 7f 7b 0e ca aa ca ad d5 15 7e 1e 00 3f bd 87 65 55 65 56 ea 8a bf 0f 00 1f de c3 b2 aa b2 ab 75 45 5f 87 80 0f ef 61 d9 55 59 55 ba a2 af c3 c0 07 f7 b0 ec aa ac aa dd 51 57 e1 e0 03 fb d8 76 55 56 55 6e a8 ab f0 f0 00
+[00] {590} 55 7f 7b 0e ca aa ca ad 95 0a 81 d1 ff c0 42 78 9a aa 9a a9 35 7a bf 17 00 1f de c3 b2 aa b2 ab 65 42 a0 74 7f f0 10 9e 26 aa a6 aa 4d 5e af c5 c0 07 f7 b0 ec aa ac aa d9 50 a8 1d 1f fc 04 27 89 aa a9 aa 93 57 ab f1 70 00
+
+Zone 2 Moon
+[00] {596} 55 7f 7b 0e ca d5 35 52 2a aa 81 f8 ff e0 21 3c 4d 4a b2 ab 75 55 5f 81 c0 07 f7 b0 ec ad 53 55 22 aa a8 1f 8f fe 02 13 c4 d4 ab 2a b7 55 55 f8 1c 00 7f 7b 0e ca d5 35 52 2a aa 81 f8 ff e0 21 3c 4d 4a b2 ab 75 55 5f 81 c0 00
+[00] {596} 55 7f 7b 0e ca d5 35 52 6a f5 7e 04 ff e0 21 3c 4d 4a b2 ab 65 42 a0 7e c0 07 f7 b0 ec ad 53 55 26 af 57 e0 4f fe 02 13 c4 d4 ab 2a b6 54 2a 07 ec 00 7f 7b 0e ca d5 35 52 6a f5 7e 04 ff e0 21 3c 4d 4a b2 ab 65 42 a0 7e c0 00
+
+Zone 2 Sun
+[00] {590} 55 7f 7b 0e ca d5 35 52 2a ea 81 de 00 3f bd 87 65 6a 9a a9 15 75 40 ef 00 1f de c3 b2 b5 4d 54 8a ba a0 77 80 0f ef 61 d9 5a a6 aa 45 5d 50 3b c0 07 f7 b0 ec ad 53 55 22 ae a8 1d e0 03 fb d8 76 56 a9 aa 91 57 54 0e f0 00
+[00] {596} 55 7f 7b 0e ca d5 35 52 6a f5 7e 04 ff e0 21 3c 4d 4a b2 ab 65 42 a0 7e c0 07 f7 b0 ec ad 53 55 26 af 57 e0 4f fe 02 13 c4 d4 ab 2a b6 54 2a 07 ec 00 7f 7b 0e ca d5 35 52 6a f5 7e 04 ff e0 21 3c 4d 4a b2 ab 65 42 a0 7e c0 00
+
+Zone 3 Moon
+[00] {590} 55 7f 7b 0e ca 95 35 52 2a aa 81 c1 ff c0 42 78 9a b5 65 56 ea aa bf 1f 00 1f de c3 b2 a5 4d 54 8a aa a0 70 7f f0 10 9e 26 ad 59 55 ba aa af c7 c0 07 f7 b0 ec a9 53 55 22 aa a8 1c 1f fc 04 27 89 ab 56 55 6e aa ab f1 f0 00
+[00] {590} 55 7f 7b 0e ca 95 35 52 6a f5 7e 39 ff c0 42 78 9a b5 65 56 ca 85 40 e3 00 1f de c3 b2 a5 4d 54 9a bd 5f 8e 7f f0 10 9e 26 ad 59 55 b2 a1 50 38 c0 07 f7 b0 ec a9 53 55 26 af 57 e3 9f fc 04 27 89 ab 56 55 6c a8 54 0e 30 00
+
+Zone 3 Sun
+[00] {590} 55 7f 7b 0e ca 95 35 52 2a ea 81 f1 ff c0 42 78 9a b5 65 56 ea 8a bf 07 00 1f de c3 b2 a5 4d 54 8a ba a0 7c 7f f0 10 9e 26 ad 59 55 ba a2 af c1 c0 07 f7 b0 ec a9 53 55 22 ae a8 1f 1f fc 04 27 89 ab 56 55 6e a8 ab f0 70 00
+[00] {590} 55 7f 7b 0e ca 95 35 52 6a f5 7e 39 ff c0 42 78 9a b5 65 56 ca 85 40 e3 00 1f de c3 b2 a5 4d 54 9a bd 5f 8e 7f f0 10 9e 26 ad 59 55 b2 a1 50 38 c0 07 f7 b0 ec a9 53 55 26 af 57 e3 9f fc 04 27 89 ab 56 55 6c a8 54 0e 30 00
+
+
+
+
+Zone 1 Off
+[00] {590} 55 7f 7b 0e ca aa ca ad d5 15 7e 1e 00 3f bd 87 65 55 65 56 ea 8a bf 0f 00 1f de c3 b2 aa b2 ab 75 45 5f 87 80 0f ef 61 d9 55 59 55 ba a2 af c3 c0 07 f7 b0 ec aa ac aa dd 51 57 e1 e0 03 fb d8 76 55 56 55 6e a8 ab f0 f0 00
+[00] {590} 55 7f 7b 0e ca aa ca ad 95 4a 81 f1 ff c0 42 78 9a aa 9a a9 35 5a bf 07 00 1f de c3 b2 aa b2 ab 65 52 a0 7c 7f f0 10 9e 26 aa a6 aa 4d 56 af c1 c0 07 f7 b0 ec aa ac aa d9 54 a8 1f 1f fc 04 27 89 aa a9 aa 93 55 ab f0 70 00
+
+Zone 2 Off
+[00] {590} 55 7f 7b 0e ca aa ca ad 95 4a 81 f1 ff c0 42 78 9a aa 9a a9 35 5a bf 07 00 1f de c3 b2 aa b2 ab 65 52 a0 7c 7f f0 10 9e 26 aa a6 aa 4d 56 af c1 c0 07 f7 b0 ec aa ac aa d9 54 a8 1f 1f fc 04 27 89 aa a9 aa 93 55 ab f0 70 00
+[00] {590} 55 7f 7b 0e ca d5 35 52 6a b5 7e 31 ff c0 42 78 9a 95 65 56 ca a5 40 e7 00 1f de c3 b2 b5 4d 54 9a ad 5f 8c 7f f0 10 9e 26 a5 59 55 b2 a9 50 39 c0 07 f7 b0 ec ad 53 55 26 ab 57 e3 1f fc 04 27 89 a9 56 55 6c aa 54 0e 70 00
+
+Zone 3 Off
+[00] {590} 55 7f 7b 0e ca 95 35 52 2a ea 81 f1 ff c0 42 78 9a b5 65 56 ea 8a bf 07 00 1f de c3 b2 a5 4d 54 8a ba a0 7c 7f f0 10 9e 26 ad 59 55 ba a2 af c1 c0 07 f7 b0 ec a9 53 55 22 ae a8 1f 1f fc 04 27 89 ab 56 55 6e a8 ab f0 70 00
+[00] {590} 55 7f 7b 0e ca 95 35 52 6a b5 7e 11 ff c0 42 78 9a b5 65 56 ca a5 40 f7 00 1f de c3 b2 a5 4d 54 9a ad 5f 84 7f f0 10 9e 26 ad 59 55 b2 a9 50 3d c0 07 f7 b0 ec a9 53 55 26 ab 57 e1 1f fc 04 27 89 ab 56 55 6c aa 54 0f 70 00
+
+
+
+
+Zone 1 HG
+[00] {590} 55 7f 7b 0e ca aa ca ad d5 15 7e 1e 00 3f bd 87 65 55 65 56 ea 8a bf 0f 00 1f de c3 b2 aa b2 ab 75 45 5f 87 80 0f ef 61 d9 55 59 55 ba a2 af c3 c0 07 f7 b0 ec aa ac aa dd 51 57 e1 e0 03 fb d8 76 55 56 55 6e a8 ab f0 f0 00
+[00] {590} 55 7f 7b 0e ca aa ca ad 95 35 7e 31 ff c0 42 78 9a aa 9a a9 35 65 40 e7 00 1f de c3 b2 aa b2 ab 65 4d 5f 8c 7f f0 10 9e 26 aa a6 aa 4d 59 50 39 c0 07 f7 b0 ec aa ac aa d9 53 57 e3 1f fc 04 27 89 aa a9 aa 93 56 54 0e 70 00
+
+Zone 2 HG
+[00] {596} 55 7f 7b 0e ca d5 35 52 2a aa 81 f8 ff e0 21 3c 4d 4a b2 ab 75 55 5f 81 c0 07 f7 b0 ec ad 53 55 22 aa a8 1f 8f fe 02 13 c4 d4 ab 2a b7 55 55 f8 1c 00 7f 7b 0e ca d5 35 52 2a aa 81 f8 ff e0 21 3c 4d 4a b2 ab 75 55 5f 81 c0 00
+[00] {590} 55 7f 7b 0e ca d5 35 52 6a ca 81 ee 00 3f bd 87 65 6a 9a a9 35 65 40 f7 00 1f de c3 b2 b5 4d 54 9a b2 a0 7b 80 0f ef 61 d9 5a a6 aa 4d 59 50 3d c0 07 f7 b0 ec ad 53 55 26 ac a8 1e e0 03 fb d8 76 56 a9 aa 93 56 54 0f 70 00
+
+Zone 3 HG
+[00] {590} 55 7f 7b 0e ca 95 35 52 2a ea 81 f1 ff c0 42 78 9a b5 65 56 ea 8a bf 07 00 1f de c3 b2 a5 4d 54 8a ba a0 7c 7f f0 10 9e 26 ad 59 55 ba a2 af c1 c0 07 f7 b0 ec a9 53 55 22 ae a8 1f 1f fc 04 27 89 ab 56 55 6e a8 ab f0 70 00
+[00] {590} 55 7f 7b 0e ca 95 35 52 6a ca 81 d1 ff c0 42 78 9a b5 65 56 ca 9a bf 17 00 1f de c3 b2 a5 4d 54 9a b2 a0 74 7f f0 10 9e 26 ad 59 55 b2 a6 af c5 c0 07 f7 b0 ec a9 53 55 26 ac a8 1d 1f fc 04 27 89 ab 56 55 6c a9 ab f1 70 00
