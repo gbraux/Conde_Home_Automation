@@ -1,4 +1,6 @@
-import urllib, json
+import urllib.request
+import requests
+import json
 import time
 import os
 
@@ -6,16 +8,16 @@ scriptPath=os.path.dirname(__file__)+'/'
 if scriptPath=='/' :
         scriptPath='./'
 
-urlPath="http://yourserver/X2D/"
+urlPath="http://192.168.11.25:3000/home/osmc/Conde_Home_Automation/www/HeaterControl/"
 if os.name == 'nt':
 	pythonPath='c:\Python27\python.exe'
 else :
-	pythonPath='python'
+	pythonPath='python3'
 
 url = urlPath+"modeStatus.php"
-response = urllib.urlopen(url)
-mode = json.loads(response.read())
-print mode
+response = requests.get(url)
+mode = response.json()
+print(mode)
 
 
 if mode['mode'] == "Manual" :
@@ -24,9 +26,9 @@ if mode['mode'] == "Manual" :
 else :
 	url = urlPath+"zonesStatusFromPlanning.php"
 
-response = urllib.urlopen(url)
-zones = json.loads(response.read())
-print zones
+response = requests.get(url)
+zones = response.json()
+print(zones)
 
 for zone,value in zones.items():
 	if zone == "zone1" :

@@ -25,7 +25,7 @@ data=list()
 dayNames=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
 stateNames=['Moon','Sun']
 
-with open('chauffage.csv', 'rb') as f:
+with open('chauffage.csv', 'rt') as f:
 	reader = csv.reader(f, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
 	for row in reader:
 		# print row
@@ -48,7 +48,7 @@ dayName=dayNames[d.weekday()]
 print(dayName)	
 
 timeStr=d.strftime("%H:%M:%S")
-print timeStr
+print(timeStr)
 
 '''
 # Some tests
@@ -57,13 +57,13 @@ print timeStr
 # timeStr="06:35:00"
 '''
 stat1=stateNames[zone1.getStatus(dayName, timeStr)]
-print stat1
+print(stat1)
 stat2=stateNames[zone2.getStatus(dayName, timeStr)]
-print stat2
+print(stat2)
 
-os.system("python %spyX2DCmd.py %s1"%(path,stat1))
+os.system("python3 %spyX2DCmd.py %s1"%(path,stat1))
 time.sleep(15)
-os.system("python %spyX2DCmd.py %s2"%(path,stat2))
+os.system("python3 %spyX2DCmd.py %s2"%(path,stat2))
 
 
 '''  

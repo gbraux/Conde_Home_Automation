@@ -15,15 +15,16 @@ if os.name == 'nt':
 else:
 	ser = serial.Serial(
 		port='/dev/ttyUSB0',
-		baudrate=9600,
+		baudrate=9600
 	)
 	
 	ser.rts = False
 	ser.dtr = False
-	ser.open()
+	#ser.open()
 
 
-ser.isOpen()
+if ser.isOpen() == False:
+    ser.open()
 
 
 if len(sys.argv) != 2 :

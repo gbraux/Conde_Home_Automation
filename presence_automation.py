@@ -21,17 +21,27 @@ import sys
 import re
 import urllib
 
+import heater_control
+
+#import presence_rest_server
+
 class GccUserClass():
 	# Rocket simulates a rocket ship for a game,
 	#  or a physics simulation.
 	
-	def __init__(self, Name, TelMac, Presence, HasChanged, ChangeSource):
+	def __init__(self, Name, TelMac, DeviceID, Presence, HasChanged, ChangeSource):
 		# Each rocket has an (x,y) position.
 		self.Name = Name
 		self.TelMac = TelMac
+		self.DeviceID = DeviceID
 		self.Presence = Presence
 		self.HasChanged = HasChanged
 		self.ChangeSource = ChangeSource
+
+		#ChangeSource
+		# --> wlc
+		# --> trap
+		# --> geofence
 
 WLC_SNMP_COMMUNITY = "public"
 WLC_SNMP_IP = "192.168.11.251"
@@ -44,13 +54,13 @@ WLC_SNMP_TRAP_MACBS_OID = "1.3.6.1.4.1.14179.2.6.2.34.0"
 
 WLAN_HOME_MACS = ["18af61cf2828","98fe9438fced"]
 
-GCC_GUILLAUME = GccUserClass('guillaume','18af61cf2828',False,False,"")
-GCC_CANDOU = GccUserClass('candou','98fe9438fced',False,False,"")
+GCC_GUILLAUME = GccUserClass('guillaume','18af61cf2828',"15F434EF-D85E-408B-A261-2C931AA38BAA",False,False,"")
+GCC_CANDOU = GccUserClass('candou','98fe9438fced',"1234",False,False,"")
 
 #  {'Name' : 'guillaume','TelMac' : '18af61cf2828', Presence : False, HasChanged : False}7
 # GCC_CANDOU = {'Name' : 'candou','TelMac' : '98fe9438fced',Presence : False, HasChanged : False}
 GCC_USERS = [GCC_GUILLAUME, GCC_CANDOU]
-logging.basicConfig(format='%(asctime)s		%(levelname)s	%(funcName)30s()		%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s		%(levelname)s	%(funcName)30s()	%(message)s', level=logging.INFO)
 
 
 
@@ -62,8 +72,37 @@ num_fetch_threads = 1
 PresenceEventQueue = Queue()
 
 # A real app wouldn't use hard-coded data...
-feed_urls = [ 'http://www.castsampler.com/cast/feed/rss/guest', 'caca', 'boudin','titi'
-			 ]
+#feed_urls = [ 'http://www.castsampler.com/cast/feed/rss/guest', 'caca', 'boudin','titi'
+#			 ]
+
+def GeofenceEvent(data, trigger, provider):
+
+	logging.info("New Geofence Event Received ("+trigger+" "+provider+")")
+	logging.info(data)
+
+	who = ""
+
+	for gcc_user in GCC_USERS:
+			if gcc_user.DeviceID in data["b'device"]:
+				who = gcc_user
+				logging.info("Geofence event related to G or C. Continue.")
+
+	if who == "":
+		logging.info("Geofence event not related to G or C. Abort !")
+		return
+
+	if provider == "locative":
+		if trigger == "departure":
+			who.Presence = False
+			who.ChangeSource = "geofence"
+			logging.info(trigger+" trigger found for user "+who.Name)
+			PresenceEventQueue.put(who)
+		elif trigger == "arrival":
+			who.Presence = True
+			who.ChangeSource = "geofence"
+			logging.info(trigger+" trigger found for user "+who.Name)
+			PresenceEventQueue.put(who)
+	
 
 def NewHouseStateAction(isSbd):
 	
@@ -81,10 +120,10 @@ def NewHouseStateAction(isSbd):
 		if (currentDate.time() <= sunrise_time):
 			logging.info("Il est entre 0h00 et sunrise (nuit)")
 			logging.info("On allume")
-			subprocess.call(['/home/osmc/LightControl', '1', '1'])
-			subprocess.call(['/home/osmc/LightControl', '2', '1'])
-			subprocess.call(['/home/osmc/LightControl', '3', '1'])
-			subprocess.call(['/home/osmc/LightControl', '4', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '1', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '2', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '3', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '4', '1'])
 
 		if (sunrise_time <= currentDate.time()) & (currentDate.time() <= sunset_time):
 			logging.info("Il est entre Sunrise et Sunset (jour)")
@@ -93,23 +132,30 @@ def NewHouseStateAction(isSbd):
 		if (currentDate.time() >= sunset_time):
 			logging.info("Il est entre Sunset et 0h00 (nuit)")
 			logging.info("On allume")
-			subprocess.call(['/home/osmc/LightControl', '1', '1'])
-			subprocess.call(['/home/osmc/LightControl', '2', '1'])
-			subprocess.call(['/home/osmc/LightControl', '3', '1'])
-			subprocess.call(['/home/osmc/LightControl', '4', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '1', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '2', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '3', '1'])
+			subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '4', '1'])
 	else:
 		#Eclairage
 		logging.info("On Eteint")
-		subprocess.call(['/home/osmc/LightControl', '1', '0'])
-		subprocess.call(['/home/osmc/LightControl', '2', '0'])
-		subprocess.call(['/home/osmc/LightControl', '3', '0'])
-		subprocess.call(['/home/osmc/LightControl', '4', '0'])
+		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '1', '0'])
+		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '2', '0'])
+		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '3', '0'])
+		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '4', '0'])
 
 def PresenceEvent(i, q):
 	while True:
 		logging.info("Looking for the next data in queue")
 		presenceData = q.get()
-		logging.info("Presence Event for user "+presenceData.Name)
+		logging.info("Presence Event for user "+presenceData.Name+" (Trigger : "+presenceData.ChangeSource+")")
+
+		# Droper les events qui sont considérés comme non pertinents
+		if (presenceData.Presence == False) & (presenceData.ChangeSource == "wlc"):
+			logging.info("Got WLC Exit event - Ignoring")
+			q.task_done()
+			continue
+
 
 		currentLocalDate = datetime.datetime.now()
 		timestamp = int(time.time())
@@ -138,7 +184,7 @@ def PresenceEvent(i, q):
 				q.task_done()
 				continue
 			else:
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
+				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
 				isGuillaumeHere = presenceData.Presence
 				isCandouHere = wasCandouHere
 
@@ -148,7 +194,7 @@ def PresenceEvent(i, q):
 				q.task_done()
 				continue
 			else:
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
+				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
 				isGuillaumeHere = wasGuillaumeHere
 				isCandouHere = presenceData.Presence
 
@@ -319,11 +365,77 @@ def SNMPTrapListenerThread():
 	transportDispatcher.jobStarted(1)
 	transportDispatcher.runDispatcher()
 
+
+def StartRestServerThread():
+		
+	server = ThreadedHTTPServer(('0.0.0.0', 3001), MyRequestHandler)
+	logging.info("Starting REST server, use <Ctrl-C> to stop")
+	#server.serve_forever()
+	
+	# --- CAN BE DELETED AFTER SUCESSFULL THREADING TEST ---
+	# Handler = MyRequestHandler
+	# SocketServer.TCPServer.allow_reuse_address = True
+	# server = SocketServer.TCPServer(('0.0.0.0', 8080), Handler)
+	
+	#server.serve_forever() --> VRAIEMENT COMMENTE ...
+	
+	thread = threading.Thread(target = server.serve_forever)
+	thread.setDaemon(False)
+	thread.start()
+	# -------------------------------------------------------
+	
+	logging.info("--- REST Server started (3001) ---")
+	return server
+
+class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+	"""Handle requests in a separate thread."""	
+class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
+	def do_POST(self):
+		
+		if None != re.search('/locativeArrivalTrigger', self.path):
+			self.send_response(200)
+			self.send_header('Access-Control-Allow-Origin', '*')
+			self.end_headers()
+			
+			content_len = int(self.headers.get('content-length', 0))
+			post_body = self.rfile.read(content_len)
+			
+			datas = urllib.parse.parse_qs(str(post_body))
+
+			#logging.info(datas)
+			GeofenceEvent(datas, "arrival","locative")
+			
+
+		if None != re.search('/locativeDepartureTrigger', self.path):
+			self.send_response(200)
+			self.send_header('Access-Control-Allow-Origin', '*')
+			self.end_headers()
+			
+			content_len = int(self.headers.get('content-length', 0))
+			post_body = self.rfile.read(content_len)
+			
+			datas = urllib.parse.parse_qs(str(post_body))
+			#logging.info(datas)
+
+			GeofenceEvent(datas, "departure","locative")
+
+
+	def log_message(self, format, *args):
+		#sys.stdout.write("%s --> [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format%args))
+		logging.info("Post REST request received : "+format%args)
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
 
 
 
-	# Set up some threads to fetch the enclosures
+	# Set up some threads manage presence event queue
 	for i in range(num_fetch_threads):
 		worker = Thread(target=PresenceEvent, args=(i, PresenceEventQueue,))
 		worker.setDaemon(False)
@@ -339,8 +451,19 @@ if __name__ == '__main__':
 	thread.setDaemon(False)
 	thread.start()
 
+	# Start REST Server (Geofence)
+	StartRestServerThread()
+
+	# thread = threading.Thread(target = RestSrv)
+	# thread.setDaemon(False)
+	# thread.start()
+
+
 	while True:
-		time.sleep(5)
+		#print("start heaters upsate")
+		time.sleep(2)
+		heater_control.UpdateHeatersStates()
+		time.sleep(20)
 
 	# Download the feed(s) and put the enclosure URLs into
 	# # the queue.
