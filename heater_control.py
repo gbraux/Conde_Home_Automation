@@ -18,7 +18,7 @@ def UpdateHeatersStates():
     dayNames=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
     stateNames=['Moon','Sun']
 
-    with open('chauffage.csv', 'rt') as f:
+    with open('/home/osmc/Conde_Home_Automation/chauffage.csv', 'rt') as f:
         reader = csv.reader(f, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
         for row in reader:
             # print row
@@ -50,6 +50,8 @@ def UpdateHeatersStates():
     # timeStr="06:35:00"
     '''
 
+    #timeStr="23:31:00"
+
     stat1=stateNames[zone1.getStatus(dayName, timeStr)]
     logging.info("Heaters Status for Zone 1 : "+stat1)
     stat2=stateNames[zone2.getStatus(dayName, timeStr)]
@@ -61,8 +63,11 @@ def UpdateHeatersStates():
     #time.sleep(15)
     #os.system("python3 %spyX2DCmd.py %s2"%(path,stat2))
 
+
     SendX2DCommand(stat1+"1")
+    SendX2DCommand("On1")
     SendX2DCommand(stat2+"2")
+    SendX2DCommand("On2")
 
 
     '''  

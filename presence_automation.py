@@ -20,6 +20,9 @@ import logging
 import sys
 import re
 import urllib
+import math
+import apscheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import heater_control
 
@@ -29,7 +32,7 @@ class GccUserClass():
 	# Rocket simulates a rocket ship for a game,
 	#  or a physics simulation.
 	
-	def __init__(self, Name, TelMac, DeviceID, Presence, HasChanged, ChangeSource):
+	def __init__(self, Name, TelMac, DeviceID, Presence, HasChanged, ChangeSource, ChangeDate):
 		# Each rocket has an (x,y) position.
 		self.Name = Name
 		self.TelMac = TelMac
@@ -37,6 +40,7 @@ class GccUserClass():
 		self.Presence = Presence
 		self.HasChanged = HasChanged
 		self.ChangeSource = ChangeSource
+		self.ChangeDate = ChangeDate
 
 		#ChangeSource
 		# --> wlc
@@ -54,8 +58,8 @@ WLC_SNMP_TRAP_MACBS_OID = "1.3.6.1.4.1.14179.2.6.2.34.0"
 
 WLAN_HOME_MACS = ["18af61cf2828","98fe9438fced"]
 
-GCC_GUILLAUME = GccUserClass('guillaume','18af61cf2828',"15F434EF-D85E-408B-A261-2C931AA38BAA",False,False,"")
-GCC_CANDOU = GccUserClass('candou','98fe9438fced',"1234",False,False,"")
+GCC_GUILLAUME = GccUserClass('guillaume','18af61cf2828',"15F434EF-D85E-408B-A261-2C931AA38BAA",False,False,"", datetime.datetime.now())
+GCC_CANDOU = GccUserClass('candou','98fe9438fced',"065AAC44-79FE-41BE-8EA6-5461EE901C1C",False,False,"",datetime.datetime.now())
 
 #  {'Name' : 'guillaume','TelMac' : '18af61cf2828', Presence : False, HasChanged : False}7
 # GCC_CANDOU = {'Name' : 'candou','TelMac' : '98fe9438fced',Presence : False, HasChanged : False}
@@ -71,14 +75,21 @@ logging.basicConfig(format='%(asctime)s		%(levelname)s	%(funcName)30s()	%(messag
 num_fetch_threads = 1
 PresenceEventQueue = Queue()
 
-# A real app wouldn't use hard-coded data...
-#feed_urls = [ 'http://www.castsampler.com/cast/feed/rss/guest', 'caca', 'boudin','titi'
-#			 ]
+
+sched = BackgroundScheduler()
+
+@sched.scheduled_job('cron', id='my_job_id', minute='0,30')
+def HalfHourScheduledEvent():
+	logging.info("Half Hour Scheduled Event Triggered !")
+	heater_control.UpdateHeatersStates()
+    
 
 def GeofenceEvent(data, trigger, provider):
 
 	logging.info("New Geofence Event Received ("+trigger+" "+provider+")")
 	logging.info(data)
+
+	receivedDate = datetime.datetime.fromtimestamp(math.floor(int(data["timestamp"][0])))
 
 	who = ""
 
@@ -95,12 +106,14 @@ def GeofenceEvent(data, trigger, provider):
 		if trigger == "departure":
 			who.Presence = False
 			who.ChangeSource = "geofence"
-			logging.info(trigger+" trigger found for user "+who.Name)
+			who.ChangeDate = receivedDate
+			logging.info(trigger+" trigger found for user "+who.Name+" generated at "+receivedDate.strftime("%Y-%m-%d %H:%M"))
 			PresenceEventQueue.put(who)
 		elif trigger == "arrival":
 			who.Presence = True
 			who.ChangeSource = "geofence"
-			logging.info(trigger+" trigger found for user "+who.Name)
+			who.ChangeDate = receivedDate
+			logging.info(trigger+" trigger found for user "+who.Name+" generated at "+receivedDate.strftime("%Y-%m-%d %H:%M"))
 			PresenceEventQueue.put(who)
 	
 
@@ -151,11 +164,10 @@ def PresenceEvent(i, q):
 		logging.info("Presence Event for user "+presenceData.Name+" (Trigger : "+presenceData.ChangeSource+")")
 
 		# Droper les events qui sont considérés comme non pertinents
-		if (presenceData.Presence == False) & (presenceData.ChangeSource == "wlc"):
+		if ((presenceData.Presence == False) & ((presenceData.ChangeSource == "wlc") | (presenceData.ChangeSource == "trap"))):
 			logging.info("Got WLC Exit event - Ignoring")
 			q.task_done()
 			continue
-
 
 		currentLocalDate = datetime.datetime.now()
 		timestamp = int(time.time())
@@ -168,14 +180,16 @@ def PresenceEvent(i, q):
 		isGuillaumeHere = False;
 		isTrapGC = False
 
-		# Get old status from MYSQL
+		# Get previous status from MYSQL
 		conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
 		cursor = conn.cursor()
-		cursor.execute("SELECT guillaume_ishere, candou_ishere  from presence ORDER BY timestamp DESC LIMIT 1")
+		cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere  from presence ORDER BY timestamp DESC LIMIT 1")
 		row = cursor.fetchone()
-		wasGuillaumeHere = bool(row[0])
-		wasCandouHere = bool(row[1])
+		wasGuillaumeHere = bool(row[1])
+		wasCandouHere = bool(row[2])
 		conn.close()
+
+
 
 
 		if presenceData.Name == "guillaume":
@@ -183,7 +197,27 @@ def PresenceEvent(i, q):
 				logging.info("NOTHING HAS CHANGED - NO ACTION")
 				q.task_done()
 				continue
+			
 			else:
+    			
+				# Check if geofence request is still valid (= not superseded by other event)
+				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
+				if (presenceData.ChangeSource == "geofence"):
+					logging.info("Geofence : Checking validity of timestamp")
+					conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
+					cursor = conn.cursor()
+					cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere  from presence WHERE guillaume_ishere = "+str(int(not presenceData.Presence))+"  ORDER BY timestamp DESC LIMIT 1")
+					row = cursor.fetchone()
+					ts = int(row[0])
+					conn.close()
+
+					if presenceData.ChangeDate > datetime.datetime.fromtimestamp(ts):
+						logging.info("Geofence : Valid timestamp (earlier than last update). Continue.")
+					else:
+						logging.info("INVALID GEOFENCE TIMESTAMP - NO ACTION")
+						q.task_done()
+						continue
+				
 				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
 				isGuillaumeHere = presenceData.Presence
 				isCandouHere = wasCandouHere
@@ -194,6 +228,25 @@ def PresenceEvent(i, q):
 				q.task_done()
 				continue
 			else:
+    				
+				# Check if geofence request is still valid (= not superseded by other event)
+				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
+				if (presenceData.ChangeSource == "geofence"):
+					logging.info("Geofence : Checking validity of timestamp")
+					conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
+					cursor = conn.cursor()
+					cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere  from presence WHERE candou_ishere = "+str(int(not presenceData.Presence))+"  ORDER BY timestamp DESC LIMIT 1")
+					row = cursor.fetchone()
+					ts = int(row[0])
+					conn.close()
+
+					if presenceData.ChangeDate > datetime.datetime.fromtimestamp(ts):
+						logging.info("Geofence : Valid timestamp (earlier than last update). Continue.")
+					else:
+						logging.info("INVALID GEOFENCE TIMESTAMP - NO ACTION")
+						q.task_done()
+						continue
+
 				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
 				isGuillaumeHere = wasGuillaumeHere
 				isCandouHere = presenceData.Presence
@@ -433,9 +486,10 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
 
+	# Start scheduler (Cron-Like) to update Heater
+	sched.start()
 
-
-	# Set up some threads manage presence event queue
+	# Set up some threads to manage presence event queue
 	for i in range(num_fetch_threads):
 		worker = Thread(target=PresenceEvent, args=(i, PresenceEventQueue,))
 		worker.setDaemon(False)
@@ -451,19 +505,21 @@ if __name__ == '__main__':
 	thread.setDaemon(False)
 	thread.start()
 
-	# Start REST Server (Geofence)
+	# Start REST Server (Geofence) - Not very stable - to be checked
 	StartRestServerThread()
+
+	#Inital update of the heaters (before regular 30 minutes scheduled update)
+	heater_control.UpdateHeatersStates()
 
 	# thread = threading.Thread(target = RestSrv)
 	# thread.setDaemon(False)
 	# thread.start()
 
-
+	#time.sleep(10)
 	while True:
 		#print("start heaters upsate")
-		time.sleep(2)
-		heater_control.UpdateHeatersStates()
-		time.sleep(20)
+		#heater_control.UpdateHeatersStates()
+		time.sleep(600)
 
 	# Download the feed(s) and put the enclosure URLs into
 	# # the queue.
