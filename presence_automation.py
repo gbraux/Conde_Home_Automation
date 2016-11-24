@@ -23,6 +23,7 @@ import urllib
 import math
 import apscheduler
 from apscheduler.schedulers.background import BackgroundScheduler
+import json
 
 import heater_control
 
@@ -82,14 +83,14 @@ sched = BackgroundScheduler()
 def HalfHourScheduledEvent():
 	logging.info("Half Hour Scheduled Event Triggered !")
 	heater_control.UpdateHeatersStates()
-    
+	
 
 def GeofenceEvent(data, trigger, provider):
 
 	logging.info("New Geofence Event Received ("+trigger+" "+provider+")")
 	logging.info(data)
 
-	receivedDate = datetime.datetime.fromtimestamp(math.floor(int(data["timestamp"][0])))
+	receivedDate = datetime.datetime.fromtimestamp(math.floor(float(data["timestamp"][0])))
 
 	who = ""
 
@@ -199,7 +200,7 @@ def PresenceEvent(i, q):
 				continue
 			
 			else:
-    			
+				
 				# Check if geofence request is still valid (= not superseded by other event)
 				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
 				if (presenceData.ChangeSource == "geofence"):
@@ -217,7 +218,10 @@ def PresenceEvent(i, q):
 						logging.info("INVALID GEOFENCE TIMESTAMP - NO ACTION")
 						q.task_done()
 						continue
-				
+
+				rec_date = presenceData.ChangeDate.strftime("%Y-%m-%d")
+				rec_time = presenceData.ChangeDate.strftime("%H:%M:%S")
+
 				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
 				isGuillaumeHere = presenceData.Presence
 				isCandouHere = wasCandouHere
@@ -228,7 +232,7 @@ def PresenceEvent(i, q):
 				q.task_done()
 				continue
 			else:
-    				
+					
 				# Check if geofence request is still valid (= not superseded by other event)
 				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
 				if (presenceData.ChangeSource == "geofence"):
@@ -246,6 +250,9 @@ def PresenceEvent(i, q):
 						logging.info("INVALID GEOFENCE TIMESTAMP - NO ACTION")
 						q.task_done()
 						continue
+
+				rec_date = presenceData.ChangeDate.strftime("%Y-%m-%d")
+				rec_time = presenceData.ChangeDate.strftime("%H:%M:%S")
 
 				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
 				isGuillaumeHere = wasGuillaumeHere
@@ -444,7 +451,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
 	"""Handle requests in a separate thread."""	
 class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 	def do_POST(self):
-		
+			
 		if None != re.search('/locativeArrivalTrigger', self.path):
 			self.send_response(200)
 			self.send_header('Access-Control-Allow-Origin', '*')
@@ -473,14 +480,48 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 			GeofenceEvent(datas, "departure","locative")
 
 
+
+		if None != re.search('/setHeaters', self.path):
+			self.send_response(200)
+			self.send_header('Access-Control-Allow-Origin', '*')
+			self.end_headers()
+			
+			content_len = int(self.headers.get('content-length', 0))
+			post_body = self.rfile.read(content_len)
+			
+			data = post_body.decode('ascii')
+
+			# Possible data
+			# - Auto
+			# - Sun1/Moon1/Hg1/Off1
+
+			#logging.info(datas)
+			heater_control.SetHeaterCommand(data)
+
+
+	def do_GET(self):
+			
+		if None != re.search('/getHeaters', self.path):
+			self.send_response(200)
+			self.send_header('Content-Type', 'application/json')
+			self.send_header('Access-Control-Allow-Origin', '*')
+			self.end_headers()
+			
+			#Build
+			dataDict = {"globalMode" : heater_control.globalMode,
+			"modeZ1" : heater_control.modeZ1,
+			"modeZ2" : heater_control.modeZ2,
+			"modeZ3" : heater_control.modeZ3,
+			"tempRemaining" : heater_control.tempRemaining}
+			
+			#logging.info(json.dumps(dataDict))
+
+			self.wfile.write(json.dumps(dataDict).encode())
+
+
 	def log_message(self, format, *args):
 		#sys.stdout.write("%s --> [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format%args))
-		logging.info("Post REST request received : "+format%args)
-
-
-
-
-
+		logging.info("REST request received : "+format%args)
 
 
 
@@ -508,7 +549,11 @@ if __name__ == '__main__':
 	# Start REST Server (Geofence) - Not very stable - to be checked
 	StartRestServerThread()
 
+	#Start X2D Queue
+	heater_control.SendX2DCommandThread()
+
 	#Inital update of the heaters (before regular 30 minutes scheduled update)
+	time.sleep(10)
 	heater_control.UpdateHeatersStates()
 
 	# thread = threading.Thread(target = RestSrv)

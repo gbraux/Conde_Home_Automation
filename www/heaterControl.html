@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+<head>
+
+    <title>Le Chauffage de Condé</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+
+
+
+    <!--<script type="text/javascript" src="https://www.google.com/jsapi"></script>-->
+    <!--
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		-->
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!--<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+			<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+			<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>-->
+
+    <style media="screen" type="text/css">
+        * {
+            font-family: Arial;
+        }
+
+
+        .ui-widget-overlay {
+   opacity: .90;
+   filter: Alpha(Opacity=30);
+}
+        /*#jauge_temp_div {
+		  float: left;
+			
+			overflow: hidden;
+			width: 450px;    
+		  }
+		  #jauge_hum_div {
+			
+			overflow: hidden;
+			width: 150px;
+		  }*/
+        /*.center{margin:auto; width: 600px}*/
+        /*.ui-state-active{
+			background: #00ff00;
+		}*/
+        /*body {
+			background-image: url("background_gray_HD.jpg");
+		} */
+    </style>
+
+
+    <script type="text/javascript">
+		// Load the Visualization API and the piechart package.
+		// google.load('visualization', '1.1', {
+		// 	'packages' : ['corechart','gauge']
+		// });
+		// Set a callback to run when the Google Visualization API is loaded.
+		//google.setOnLoadCallback(drawChart);
+		var autoUpdate = false;
+		var endDate = new Date();
+		var startDate = new Date(endDate);
+		startDate.setDate(endDate.getDate() - 1);
+		
+		// function setControls(isAuto, heatingOn, coolingOn, fanOn) {
+			
+			
+		// }
+		
+		function updateControlButtons() {
+			var jsonMode = $.ajax({
+					url : "http://braux-conde.no-ip.org:3001/getHeaters",
+					dataType : "json",
+					async : false
+				}).responseText;
+				
+			
+			
+			
+			ModeData = JSON.parse(jsonMode);
+			
+			
+			//POST TEST -------------
+			
+            
+            globalMode = ModeData["globalMode"];
+
+            isAuto = true;
+            if (globalMode == "Manual")
+            {
+                isAuto = false;
+            }
+
+
+            currentMode = ModeData["modeZ1"]+"1";
+            //console.log("Auto "+isAuto);
+            console.log("currentMode "+currentMode);
+
+            if (globalMode == "Auto") {
+				$("#controlButtonSet").buttonset( "disable" );
+				$("#Auto").prop("checked",true).button("refresh");
+                $("#Manual").prop("checked",false).button("refresh");
+                $("#Temp").prop("checked",false).button("refresh");
+                $("#Temp").checkboxradio( "option", "label", "Régulation Temporaire");
+			}
+			else if (globalMode == "Manual") {
+				$("#controlButtonSet").buttonset( "enable" );
+				$("#Auto").prop("checked",false).button("refresh");
+                $("#Manual").prop("checked",true).button("refresh");
+                $("#Temp").prop("checked",false).button("refresh");
+                $("#Temp").checkboxradio( "option", "label", "Régulation Temporaire");
+			}
+			else if (globalMode == "Temp") {
+				$("#controlButtonSet").buttonset( "disable" );
+				$("#Auto").prop("checked",false).button("refresh");
+                $("#Manual").prop("checked",false).button("refresh");
+                $("#Temp").prop("checked",true).button("refresh");
+
+                temprm = ModeData["tempRemaining"];
+                console.log(temprm)
+                timeString = secondsToString(temprm*60)
+                console.log(timeString)
+                $("#Temp").checkboxradio( "option", "label", "Régulation Temporaire \r\n (reste "+timeString+")");
+			}
+
+            if (currentMode == "Sun1")
+            {
+                $("#Sun1").prop("checked",true).button("refresh");
+                $("#Moon1").prop("checked",false).button("refresh");
+                $("#Hg1").prop("checked",false).button("refresh");
+                $("#Off1").prop("checked",false).button("refresh");
+            }
+
+            if (currentMode == "Moon1")
+            {
+                $("#Sun1").prop("checked",false).button("refresh");
+                $("#Moon1").prop("checked",true).button("refresh");
+                $("#Hg1").prop("checked",false).button("refresh");
+                $("#Off1").prop("checked",false).button("refresh");
+            }
+
+            if (currentMode == "Hg1")
+            {
+                $("#Sun1").prop("checked",false).button("refresh");
+                $("#Moon1").prop("checked",false).button("refresh");
+                $("#Hg1").prop("checked",true).button("refresh");
+                $("#Off1").prop("checked",false).button("refresh");
+            }
+			
+            if (currentMode == "Off1")
+            {
+                $("#Sun1").prop("checked",false).button("refresh");
+                $("#Moon1").prop("checked",false).button("refresh");
+                $("#Hg1").prop("checked",false).button("refresh");
+                $("#Off1").prop("checked",true).button("refresh");
+            }
+			
+		}
+		function setControl()
+		{
+			console.log("buttonState : "+$("#Auto").prop('checked'));
+            console.log("Selected State Button : "+$("#controlButtonSet :radio:checked").attr('id'));
+
+
+			
+            jsconData = "Auto"
+			
+            if ($("#Auto").prop('checked'))
+            {
+                jsconData = "Auto"
+            }
+            else if ($("#Manual").prop('checked'))
+            {
+                //$("#controlButtonSet :radio:checked").attr('id');
+                jsconData = $("#controlButtonSet :radio:checked").attr('id');
+            }
+            else if ($("#Temp").prop('checked'))
+            {
+                delay = $( "#spinner" ).val()
+                delay = delay * 60
+                //$("#controlButtonSet :radio:checked").attr('id');
+                jsconData = "Temp "+$("#tempModeSelect" ).val()+" "+delay
+            }
+            
+            //print(jsconData)
+            //jsconData = "{\"isauto\":"+$("#autoButton").prop('checked')+",\"heatingOn\":"+$("#heaterButton").prop('checked')+", \"coolingOn\":"+$("#gfButton").prop('checked')+", \"fanOn\":"+$("#fanButton").prop('checked')+"}";
+			
+			//$("#autoButton").checked
+			
+			//JSON.stringify(ModeData)
+			
+			$.ajax("http://braux-conde.no-ip.org:3001/setHeaters", {
+			data : jsconData,
+			type : 'POST'})
+			
+		}
+		
+
+        function secondsToString(seconds) 
+        {
+            var numdays = Math.floor(seconds / 86400);
+            var numhours = Math.floor((seconds % 86400) / 3600);
+            var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
+            var numseconds = ((seconds % 86400) % 3600) % 60;
+            return numdays + "J " + numhours + "h " + numminutes + "min";
+        }
+        </script>
+
+
+    <script type="text/javascript">
+		//$(document).ready(function () {
+		$(window).load(function () {
+			// First load the chart once
+			console.log("loaded");
+
+			updateControlButtons();
+			
+			// Set interval to call the drawChart again
+			setInterval(updateControlButtons, 10000);
+		});
+
+		
+		$(function () {
+
+                    $( "#dialog" ).dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons: {
+                        "Valider": function() {
+                        setTemp();
+                        $( this ).dialog( "close" );
+                        },
+                        "Annuler": function() {
+                        $( this ).dialog( "close" );
+                        }
+                    }
+                    });
+
+            function setTemp()
+            {
+                $("#controlButtonSet").buttonset( "enable" );
+				$("#Auto").prop("checked",false).button("refresh");
+                $("#Manual").prop("checked",false).button("refresh");
+                $("#Temp").prop("checked",true).button("refresh");
+                console.log($( "#tempModeSelect" ).val())
+                console.log($( "#spinner" ).val())
+                console.log("Coucou")
+                setControl()
+
+            }
+
+
+                $( "#opener" ).on( "click", function() {
+                $( "#dialog" ).dialog( "open" );
+                });
+			
+                var tempModeSelect =  $( "#tempModeSelect" ).selectmenu();
+                var spinner = $( "#spinner" ).spinner();
+
+			    //$( "#autoButton" ).checkboxradio({icon: false});
+                $( "#modeButtonSet" ).buttonset();
+				$( "#controlButtonSet" ).buttonset();
+				$( "#modeButtonSet").change(function () {
+				
+//$( "#dialog" ).dialog( "open" );
+                console.log(this)
+				
+					
+				if ($("#modeButtonSet :radio:checked").attr('id') == "Auto") {
+					$( "#controlButtonSet" ).buttonset( "disable" );
+                    setControl()
+				} 
+                else if ($("#modeButtonSet :radio:checked").attr('id') == "Temp") {
+					$( "#controlButtonSet" ).buttonset( "disable" );
+                    $( "#dialog" ).dialog( "open" );
+				}  
+                else if ($("#modeButtonSet :radio:checked").attr('id') == "Manual") {
+					$( "#controlButtonSet" ).buttonset( "enable" );
+                    setControl()
+				}
+			});
+			
+			
+			$("#controlButtonSet").change(function () {
+				setControl()
+			});
+			
+		});
+		
+        </script>
+
+</head>
+
+<body>
+
+    <div align="center">
+        <b style="font-size:15pt;">--- Le Chauffage de Condé ---</b>
+        <br>
+        <br>
+
+        <fieldset>
+            <legend>Selectionnez le mode de régulation</legend>
+            <!--<input align="center" type="checkbox" id="autoButton"><label for="autoButton">Régulation Automatique</label>-->
+            <div id="modeButtonSet">
+                <div><input type="radio" id="Auto" name="modeButtonSet" /><label for="Auto">Régulation Automatique</label></div>
+                <br><div><input type="radio" id="Manual" name="modeButtonSet" /><label for="Manual">Régulation Manuelle</label></div>
+                <br><div><input type="radio" id="Temp" name="modeButtonSet" /><label for="Temp">Régulation Temporaire</label></div>
+                
+            </div>
+        </fieldset>
+        <!--<div id="controlButtonSet" align="center" >
+		  <input type="checkbox" id="gfButton"><label for="gfButton">Compresseur</label>
+		  <input type="checkbox" id="heaterButton"><label for="heaterButton">Chauffage</label>
+		  <input type="checkbox" id="fanButton"><label for="fanButton">Ventilation</label>
+
+
+		</div>-->
+        <br>
+
+
+        <fieldset>
+            <legend>Selectionnez le mode de chauffage</legend>
+            <div id="controlButtonSet">
+                <div><input type="radio" id="Sun1" name="controlButtonSet" /><label for="Sun1">Confort&emsp;</label></div>
+                <br><div><input type="radio" id="Moon1" name="controlButtonSet" /><label for="Moon1">Eco (Nuit)&emsp;</label></div>
+                <br><div><input type="radio" id="Hg1" name="controlButtonSet" /><label for="Hg1">Hors Gel&emsp;</label></div>
+                <br><div><input type="radio" id="Off1" name="controlButtonSet" /><label for="Off1">Arret&emsp;</label></div>
+            </div>
+        </fieldset>
+
+
+        <div id="dialog" title="Régulation Temporaire">
+        <p>
+            <label for="spinner">Durée du mode temporaire :</label>
+            <input id="spinner" value="1" name="value">heure(s)
+        </p>
+
+        <p>
+    <label for="tempModeSelect">Selectionnez le mode de chauffage :</label>
+    <select name="tempModeSelect" id="tempModeSelect">
+      <option value="Sun1" selected="selected">Confort</option>
+      <option value="Moon1">Eco (Nuit)</option>
+      <option value="Hg1">Hors Gel</option>
+      <option value="Off1">Arret</option>
+    </select>
+        </p>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
