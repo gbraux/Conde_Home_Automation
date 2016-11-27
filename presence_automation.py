@@ -219,10 +219,14 @@ def PresenceEvent(i, q):
 						q.task_done()
 						continue
 
-				rec_date = presenceData.ChangeDate.strftime("%Y-%m-%d")
-				rec_time = presenceData.ChangeDate.strftime("%H:%M:%S")
+				rec_dateg = presenceData.ChangeDate.strftime("%Y-%m-%d")
+				rec_timeg = presenceData.ChangeDate.strftime("%H:%M:%S")
 
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
+				str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))
+
+				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_dateg+"','"+rec_timeg+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
+
+				print(sqlrec)
 				isGuillaumeHere = presenceData.Presence
 				isCandouHere = wasCandouHere
 
@@ -251,10 +255,12 @@ def PresenceEvent(i, q):
 						q.task_done()
 						continue
 
-				rec_date = presenceData.ChangeDate.strftime("%Y-%m-%d")
-				rec_time = presenceData.ChangeDate.strftime("%H:%M:%S")
+				rec_datec = presenceData.ChangeDate.strftime("%Y-%m-%d")
+				rec_timec = presenceData.ChangeDate.strftime("%H:%M:%S")
 
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(timestamp)+",'"+rec_date+"','"+rec_time+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
+				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_datec+"','"+rec_timec+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
+
+				print(sqlrec)
 				isGuillaumeHere = wasGuillaumeHere
 				isCandouHere = presenceData.Presence
 
