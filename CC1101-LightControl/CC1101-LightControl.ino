@@ -1,7 +1,5 @@
 #include "cc1101.h"
 
-#include "X2D_Heater_Messages.h"
-
 CC1101 cc1101;
 
 // Handle Serial commands
