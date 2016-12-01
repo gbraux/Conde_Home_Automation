@@ -13,4 +13,10 @@
 
 sudo motion -m
 
+logger -t rc-local "Starting TeleinfoReader Host Process"
+nohup /home/osmc/Conde_Home_Automation/Teleinfo/teleinfoserial_mysql_host >/dev/null 2>&1 &
+
+logger -t rc-local "Starting Presence Automation"
+nohup python3 /home/osmc/Conde_Home_Automation/presence_automation.py >/home/osmc/automation.log 2>&1 &
+
 exit 0
