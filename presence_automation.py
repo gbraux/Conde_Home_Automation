@@ -84,6 +84,23 @@ def HalfHourScheduledEvent():
 	logging.info("Half Hour Scheduled Event Triggered !")
 	heater_control.UpdateHeatersStates()
 	
+def IsThereAnybody():
+	logging.info("Checking MYSQL to find if sbd is there ! ...")
+	# Get previous status from MYSQL
+	conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
+	cursor = conn.cursor()
+	cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere  from presence ORDER BY timestamp DESC LIMIT 1")
+	row = cursor.fetchone()
+	wasGuillaumeHere = bool(row[1])
+	wasCandouHere = bool(row[2])
+	conn.close()
+
+	logging.info("Last presence status -> Guillaume ("+str(wasGuillaumeHere)+") Candou ("+str(wasCandouHere)+")")
+
+	if wasGuillaumeHere | wasCandouHere:
+		return True
+	else:
+		return False
 
 def GeofenceEvent(data, trigger, provider):
 
@@ -122,6 +139,7 @@ def NewHouseStateAction(isSbd):
 	
 	logging.info("Changement de status de la maison (vide = 0, occupee = 1) --> "+str(int(isSbd)))
 	
+	## Eclairage
 	if isSbd:
 		#Eclairage
 		s = sunrise.sun(lat=48.741906,long=1.660730) 
@@ -157,6 +175,10 @@ def NewHouseStateAction(isSbd):
 		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '2', '0'])
 		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '3', '0'])
 		subprocess.call(['/home/osmc/Conde_Home_Automation/LightControl/LightControl', '4', '0'])
+
+
+	## Chauffage
+	heater_control.UpdateHeatersStates()
 
 def PresenceEvent(i, q):
 	while True:
@@ -224,7 +246,7 @@ def PresenceEvent(i, q):
 
 				str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))
 
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_dateg+"','"+rec_timeg+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
+				sqlrec = "REPLACE INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_dateg+"','"+rec_timeg+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
 
 				print(sqlrec)
 				isGuillaumeHere = presenceData.Presence
@@ -258,7 +280,7 @@ def PresenceEvent(i, q):
 				rec_datec = presenceData.ChangeDate.strftime("%Y-%m-%d")
 				rec_timec = presenceData.ChangeDate.strftime("%H:%M:%S")
 
-				sqlrec = "INSERT INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_datec+"','"+rec_timec+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
+				sqlrec = "REPLACE INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_datec+"','"+rec_timec+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
 
 				print(sqlrec)
 				isGuillaumeHere = wasGuillaumeHere

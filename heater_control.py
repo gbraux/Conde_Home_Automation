@@ -9,6 +9,7 @@ import logging
 import HandlePlanning
 from queue import Queue
 from threading import Thread
+import presence_automation
 
 globalMode = "Auto"
 modeZ1 = "Moon"
@@ -121,75 +122,75 @@ def UpdateHeatersStates():
 	
 		logging.info("Heaters are in Auto Mode")
 
-		path=os.path.dirname(__file__)+'/'
-		if path=='/' :
-				path='./'
-
-		data=list()
-		dayNames=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
-		stateNames=['Moon','Sun']
-
-		with open('/home/osmc/Conde_Home_Automation/chauffage.csv', 'rt') as f:
-			reader = csv.reader(f, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
-			for row in reader:
-				# print row
-				data.append(row)
-			
-		zone1=HandlePlanning.HandlePlanning()
-		zone2=HandlePlanning.HandlePlanning()
-			
-		zone1.setData(data)
-		zone2.setData(data)
-
-		horaires=zone1.getHoraires()
-		zone2.getHoraires()
-			
-		zone1.getZone("Zone 1")
-		zone2.getZone("Zone 2")
-
-		d=datetime.now()
-		dayName=dayNames[d.weekday()]
-		#print(dayName)	
-
-		timeStr=d.strftime("%H:%M:%S")
-		#print(timeStr)
-
-		'''
-		# Some tests
-		# timeStr="07:35:00"
-		# timeStr="07:00:00"
-		# timeStr="06:35:00"
-		'''
-
-		#timeStr="23:31:00"
-
-		stat1=stateNames[zone1.getStatus(dayName, timeStr)]
-		logging.info("Heaters Status for Zone 1 : "+stat1)
-		stat2=stateNames[zone2.getStatus(dayName, timeStr)]
-		logging.info("Heaters Status for Zone 2 : "+stat2)
-
-
+		if presence_automation.IsThereAnybody() == False:
+    			
+			logging.info("Nobody is at home - Putting the heaters in Moon mode")
+			modeZ1 = "Moon"
+			SendX2DCommand("Moon"+"1")
+			SendX2DCommand("On1")
+				
+		else:
 		
-		#os.system("python3 %spyX2DCmd.py %s1"%(path,stat1))
-		#time.sleep(15)
-		#os.system("python3 %spyX2DCmd.py %s2"%(path,stat2))
+			path=os.path.dirname(__file__)+'/'
+			if path=='/' :
+					path='./'
 
-		modeZ1 = stat1
-		SendX2DCommand(stat1+"1")
-		SendX2DCommand("On1")
+			data=list()
+			dayNames=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+			stateNames=['Moon','Sun']
 
-		# modeZ2 = stat2+"2"
-		# SendX2DCommand(stat2+"2")
-		# SendX2DCommand("On2")
+			with open('/home/osmc/Conde_Home_Automation/chauffage.csv', 'rt') as f:
+				reader = csv.reader(f, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
+				for row in reader:
+					# print row
+					data.append(row)
+				
+			zone1=HandlePlanning.HandlePlanning()
+			zone2=HandlePlanning.HandlePlanning()
+				
+			zone1.setData(data)
+			zone2.setData(data)
+
+			horaires=zone1.getHoraires()
+			zone2.getHoraires()
+				
+			zone1.getZone("Zone 1")
+			zone2.getZone("Zone 2")
+
+			d=datetime.now()
+			dayName=dayNames[d.weekday()]
+			#print(dayName)	
+
+			timeStr=d.strftime("%H:%M:%S")
+			#print(timeStr)
+
+			'''
+			# Some tests
+			# timeStr="07:35:00"
+			# timeStr="07:00:00"
+			# timeStr="06:35:00"
+			'''
+
+			#timeStr="23:31:00"
+
+			stat1=stateNames[zone1.getStatus(dayName, timeStr)]
+			logging.info("Heaters Status for Zone 1 : "+stat1)
+			stat2=stateNames[zone2.getStatus(dayName, timeStr)]
+			logging.info("Heaters Status for Zone 2 : "+stat2)
 
 
-		'''  
-		# Some Tests
-		zone1.getStatus("mercredi", "10:30:05")
-		zone1.getStatus("mercredi", "11:00:05")
-		zone1.getStatus("mercredi", "11:30:05")
-		zone1.getStatus("mercredi", "12:00:05")
-		'''
+			
+			#os.system("python3 %spyX2DCmd.py %s1"%(path,stat1))
+			#time.sleep(15)
+			#os.system("python3 %spyX2DCmd.py %s2"%(path,stat2))
+
+			modeZ1 = stat1
+			SendX2DCommand(stat1+"1")
+			SendX2DCommand("On1")
+
+			# modeZ2 = stat2+"2"
+			# SendX2DCommand(stat2+"2")
+			# SendX2DCommand("On2")
 
 	else:
 		logging.info("Heaters are NOT in auto mode (manual or Temporary Mode). Refreshing manual States")
