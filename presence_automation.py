@@ -212,9 +212,6 @@ def PresenceEvent(i, q):
 		wasCandouHere = bool(row[2])
 		conn.close()
 
-
-
-
 		if presenceData.Name == "guillaume":
 			if (wasGuillaumeHere == presenceData.Presence):
 				logging.info("NOTHING HAS CHANGED - NO ACTION")
@@ -223,16 +220,31 @@ def PresenceEvent(i, q):
 			
 			else:
 				
+				#getting last update ts & type
+				conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
+				cursor = conn.cursor()
+				cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere, change_trigger  from presence WHERE guillaume_ishere = "+str(int(not presenceData.Presence))+"  ORDER BY timestamp DESC LIMIT 1")
+				row = cursor.fetchone()
+				ts = int(row[0])
+				lastType = str(row[3])
+				conn.close()
+				logging.info("Last known update for user "+presenceData.Name+" : "+str(ts)+" "+lastType)
+				
+				# Wait 30 minutes if getting a WLC presence notification, but geofence occured only 30 min before
+				if (((presenceData.ChangeSource == "wlc") | (presenceData.ChangeSource == "trap")) & (lastType == "geofence")):
+					logging.info("WLC/Trap : Checking if there was no recent Geofence notification")
+
+					if timestamp - 1800 > ts:
+						logging.info("WLC/Trap : Valid event. Last geofence ocured more that 30 min earlier")
+					else:
+						logging.info("WLC/Trap : INVALID EVENT. GEOFENCE OCCURED TOO RECENTLY")
+						q.task_done()
+						continue
+
 				# Check if geofence request is still valid (= not superseded by other event)
 				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
 				if (presenceData.ChangeSource == "geofence"):
 					logging.info("Geofence : Checking validity of timestamp")
-					conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
-					cursor = conn.cursor()
-					cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere  from presence WHERE guillaume_ishere = "+str(int(not presenceData.Presence))+"  ORDER BY timestamp DESC LIMIT 1")
-					row = cursor.fetchone()
-					ts = int(row[0])
-					conn.close()
 
 					if presenceData.ChangeDate > datetime.datetime.fromtimestamp(ts):
 						logging.info("Geofence : Valid timestamp (earlier than last update). Continue.")
@@ -248,7 +260,7 @@ def PresenceEvent(i, q):
 
 				sqlrec = "REPLACE INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_dateg+"','"+rec_timeg+"','"+presenceData.ChangeSource+"',"+str(int(presenceData.Presence))+","+str(int(wasCandouHere))+")"
 
-				print(sqlrec)
+				#print(sqlrec)
 				isGuillaumeHere = presenceData.Presence
 				isCandouHere = wasCandouHere
 
@@ -258,7 +270,29 @@ def PresenceEvent(i, q):
 				q.task_done()
 				continue
 			else:
-					
+
+				#getting last update ts & type
+				conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
+				cursor = conn.cursor()
+				cursor.execute("SELECT timestamp, guillaume_ishere, candou_ishere, change_trigger  from presence WHERE candou_ishere = "+str(int(not presenceData.Presence))+"  ORDER BY timestamp DESC LIMIT 1")
+				row = cursor.fetchone()
+				ts = int(row[0])
+				lastType = str(row[3])
+				conn.close()
+				logging.info("Last known update for user "+presenceData.Name+" : "+str(ts)+" "+lastType)
+				
+				# Wait 30 minutes if getting a WLC presence notification, but geofence occured only 30 min before
+				if (((presenceData.ChangeSource == "wlc") | (presenceData.ChangeSource == "trap")) & (lastType == "geofence")):
+					logging.info("WLC/Trap : Checking if there was no recent Geofence notification")
+
+					if timestamp - 1800 > ts:
+						logging.info("WLC/Trap : Valid event. Last geofence ocured more that 30 min earlier")
+					else:
+						logging.info("WLC/Trap : INVALID EVENT. GEOFENCE OCCURED TOO RECENTLY")
+						q.task_done()
+						continue
+
+
 				# Check if geofence request is still valid (= not superseded by other event)
 				# We find the timestamp of the oposite event in Mysql and compares with the Geofenced event
 				if (presenceData.ChangeSource == "geofence"):
@@ -282,7 +316,7 @@ def PresenceEvent(i, q):
 
 				sqlrec = "REPLACE INTO presence (timestamp, rec_date, rec_time, change_trigger, guillaume_ishere, candou_ishere) VALUES ("+str(int(round(time.mktime(presenceData.ChangeDate.timetuple()))))+",'"+rec_datec+"','"+rec_timec+"','"+presenceData.ChangeSource+"',"+str(int(wasGuillaumeHere))+","+str(int(presenceData.Presence))+")"
 
-				print(sqlrec)
+				#print(sqlrec)
 				isGuillaumeHere = wasGuillaumeHere
 				isCandouHere = presenceData.Presence
 
@@ -292,6 +326,7 @@ def PresenceEvent(i, q):
 
 		#if needed, write new status in mysql
 		logging.info("Writing new status to MYSQL")
+		logging.info("SQL Request : "+sqlrec)
 		conn = mysql.connector.connect(host="localhost",user="root",password="raspberry", database="domotique")
 		cursor = conn.cursor()
 		cursor.execute(sqlrec)
