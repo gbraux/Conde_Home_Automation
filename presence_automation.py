@@ -376,31 +376,38 @@ def GetWlanUsersMac():
 	wlanMacs = []
 
 	logging.info("-> Requete SNMP de recherche des clients WLAN")
+	
+	try:
+		for errorIndication, errorStatus, \
+			errorIndex, varBinds in bulkCmd(
+				SnmpEngine(),
+				CommunityData(WLC_SNMP_COMMUNITY),
+				UdpTransportTarget((WLC_SNMP_IP, WLC_SNMP_PORT)),
+				ContextData(),
+				0, 40,  # GETBULK specific: request up to 50 OIDs in a single response
+				ObjectType(ObjectIdentity(WLC_SNMP_MAC_CLIENTS_OID)),
+				lookupMib=False, lexicographicMode=False):
 
-	for errorIndication, errorStatus, \
-		errorIndex, varBinds in bulkCmd(
-			SnmpEngine(),
-			CommunityData(WLC_SNMP_COMMUNITY),
-			UdpTransportTarget((WLC_SNMP_IP, WLC_SNMP_PORT)),
-			ContextData(),
-			0, 40,  # GETBULK specific: request up to 50 OIDs in a single response
-			ObjectType(ObjectIdentity(WLC_SNMP_MAC_CLIENTS_OID)),
-			lookupMib=False, lexicographicMode=False):
-
-		if errorIndication:
-			logging.info(errorIndication)
-			break
-		elif errorStatus:
-			logging.info('%s at %s' % (errorStatus.prettyPrint(),
-								errorIndex and varBinds[int(errorIndex)-1][0] or '?'))
-			break
-		else:
-			for varBind in varBinds:
-				logging.info(' = '.join([x.prettyPrint() for x in varBind]))
-				wlanMacs.append(varBind[1].prettyPrint().lstrip("0x"))
+			if errorIndication:
+				logging.info(errorIndication)
+				break
+			elif errorStatus:
+				logging.info('%s at %s' % (errorStatus.prettyPrint(),
+									errorIndex and varBinds[int(errorIndex)-1][0] or '?'))
+				break
+			else:
+				for varBind in varBinds:
+					logging.info(' = '.join([x.prettyPrint() for x in varBind]))
+					wlanMacs.append(varBind[1].prettyPrint().lstrip("0x"))
+					
+		return wlanMacs
+	except:
+		logging.info("Erreur SNMP (Network unreachable ??)")
+		return []
+		
 	
 	
-	return wlanMacs
+
 
 def SnmpWifiTrapReceiver(transportDispatcher, transportDomain, transportAddress, wholeMsg):
 		
