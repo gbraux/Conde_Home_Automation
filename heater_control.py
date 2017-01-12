@@ -213,29 +213,35 @@ def SendX2DCommandQueue(q):
 		logging.info("X2D Command in queue : "+command)
 		logging.info("Opening Serial Port")
 		
-		if os.name == 'nt':
-			ser = serial.Serial(
-				port='COM10',
-				baudrate=9600
+		try:
+			if os.name == 'nt':
+				ser = serial.Serial(
+					port='COM10',
+					baudrate=9600
+					
+				)
+			
+				ser.rts = False
+				ser.dtr = False
+			else:
+				ser = serial.Serial(
+					port='/dev/ttyUSB0',
+					baudrate=9600
+				)
 				
-			)
-			
-			ser.rts = False
-			ser.dtr = False
-		else:
-			ser = serial.Serial(
-				port='/dev/ttyUSB0',
-				baudrate=9600
-			)
-			
-			ser.rts = False
-			ser.dtr = False
-			#ser.open()
+				ser.rts = False
+				ser.dtr = False
+				#ser.open()
 
 
-		if ser.isOpen() == False:
-			ser.open()
-			logging.info("Serial Port Opened")
+			if ser.isOpen() == False:
+				ser.open()
+				logging.info("Serial Port Opened")
+
+		except:
+			logging.info("ERROR WHILE OPENING SERIAL PORT !")
+			q.task_done()
+			continue
 
 		out = ''
 		# wait for RFbee init
