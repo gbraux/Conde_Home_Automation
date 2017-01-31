@@ -356,11 +356,13 @@ def UpdateWlanUsers():
 	for gcc_user in GCC_USERS:
 		if gcc_user.TelMac in macs:
 			gcc_user.Presence = True
+			gcc_user.ChangeDate = datetime.datetime.fromtimestamp(int(time.time()))
 			gcc_user.ChangeSource = "wlc"
 			logging.info("Filling Queue")
 			PresenceEventQueue.put(gcc_user)
 		else:
 			gcc_user.Presence = False
+			gcc_user.ChangeDate = datetime.datetime.fromtimestamp(int(time.time()))
 			gcc_user.ChangeSource = "wlc"
 			logging.info("Filling Queue")
 			PresenceEventQueue.put(gcc_user)
