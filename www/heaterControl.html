@@ -74,7 +74,7 @@
 		
 		function updateControlButtons() {
 			var jsonMode = $.ajax({
-					url : "http://braux-conde.no-ip.org:3001/getHeaters",
+					url : "http://maison.braux.me:3001/getHeaters",
 					dataType : "json",
 					async : false
 				}).responseText;
@@ -194,7 +194,7 @@
 			
 			//JSON.stringify(ModeData)
 			
-			$.ajax("http://braux-conde.no-ip.org:3001/setHeaters", {
+			$.ajax("http://maison.braux.me:3001/setHeaters", {
 			data : jsconData,
 			type : 'POST'})
 			
