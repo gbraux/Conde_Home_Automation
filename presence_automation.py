@@ -57,10 +57,10 @@ WLC_SNMP_TRAP_ASSOCIATION_OID = "1.3.6.1.4.1.14179.2.6.3.53"
 WLC_SNMP_TRAP_DISASSOCIATION_OID = "1.3.6.1.4.1.14179.2.6.3.1"
 WLC_SNMP_TRAP_MACBS_OID = "1.3.6.1.4.1.14179.2.6.2.34.0"
 
-WLAN_HOME_MACS = ["18af61cf2828","98fe9438fced"]
+WLAN_HOME_MACS = ["18af61cf2828","784f43150f15"]
 
 GCC_GUILLAUME = GccUserClass('guillaume','18af61cf2828',"15F434EF-D85E-408B-A261-2C931AA38BAA",False,False,"", datetime.datetime.now())
-GCC_CANDOU = GccUserClass('candou','98fe9438fced',"065AAC44-79FE-41BE-8EA6-5461EE901C1C",False,False,"",datetime.datetime.now())
+GCC_CANDOU = GccUserClass('candou','784f43150f15',"AEFE7AF7-7197-490E-ABBE-48A40FDB2EA5",False,False,"",datetime.datetime.now())
 
 #  {'Name' : 'guillaume','TelMac' : '18af61cf2828', Presence : False, HasChanged : False}7
 # GCC_CANDOU = {'Name' : 'candou','TelMac' : '98fe9438fced',Presence : False, HasChanged : False}
