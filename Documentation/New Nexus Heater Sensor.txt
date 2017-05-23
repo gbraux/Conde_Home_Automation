@@ -1,0 +1,10 @@
+Pulse : 484us
+Short sync : 143us
+Sync 0 = 3988us
+Long 0 (1) = 1986us
+Short 0 (0) = 993us
+
+{ 143, { 1,  28 }, {  3,  7}, { 3,  14 }, false }      // protocol 7 (Temp Sensor)
+
+Trouver Sample Audacity en uS
+2.4 / Samples

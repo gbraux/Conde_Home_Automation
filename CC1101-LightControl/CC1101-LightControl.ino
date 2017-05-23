@@ -228,13 +228,13 @@ void loop()
     inputString = "";
     stringComplete = false;
   }
-  mySerialEvent();
+  //mySerialEvent();
 }
 
 /*
   SerialEvent doesn't work with rfBee, so we create our function we will call manually
  */
-void mySerialEvent() {
+void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
