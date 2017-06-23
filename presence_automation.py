@@ -568,7 +568,13 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 			# - Sun1/Moon1/Hg1/Off1
 
 			#logging.info(datas)
-			heater_control.SetHeaterCommand(data)
+
+			if (data.endswith("1") | data.endswith("2") | data.endswith("3")):
+				heater_control.SetHeaterCommand(str(data)[:-1] + "1")
+				heater_control.SetHeaterCommand(str(data)[:-1] + "2")
+				heater_control.SetHeaterCommand(str(data)[:-1] + "3")
+			else:
+				heater_control.SetHeaterCommand(data)
 
 
 	def do_GET(self):

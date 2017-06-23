@@ -10,14 +10,49 @@ import HandlePlanning
 from queue import Queue
 from threading import Thread
 import presence_automation
+from configparser import ConfigParser
 
-globalMode = "Auto"
-modeZ1 = "Moon"
-modeZ2 = "Moon"
-modeZ3 = "Moon"
+# ---- Config File Read/Init ----
+config = ConfigParser()
+config.read("/home/osmc/Conde_Home_Automation/config.ini")
+# print(config)
+# print(config.get('heaterstates', 'lastmode'))
+
+globalMode = config.get('heaterstates', 'lastmode')
+modeZ1 = config.get('heaterstates', 'laststate1')
+modeZ2 = config.get('heaterstates', 'laststate2')
+modeZ3 = config.get('heaterstates', 'laststate3')
+season = config.get('heaterstates', 'season')
+
+
+# globalMode = "Auto"
+# modeZ1 = "Moon"
+# modeZ2 = "Moon"
+# modeZ3 = "Moon"
 tempRemaining = 0 # minutes
 
 X2DEventQueue = Queue()
+
+def SaveHeaterStatesToFile():
+
+	global globalMode
+	global modeZ1
+	global modeZ2
+	global modeZ3
+
+	if (globalMode=="Temp"):
+		config.set('heaterstates', 'lastmode', "Auto")
+	else:
+		config.set('heaterstates', 'lastmode', globalMode)
+
+	config.set('heaterstates', 'laststate1', modeZ1)
+	config.set('heaterstates', 'laststate2', modeZ2)
+	config.set('heaterstates', 'laststate3', modeZ3)
+	
+	with open('/home/osmc/Conde_Home_Automation/config.ini', 'w') as configfile:
+		config.write(configfile)
+
+	logging.info("Heater State saved to INI File")
 
 def StartTempModeThread():
 	worker = Thread(target=StartTempMode)
@@ -66,6 +101,8 @@ def SetHeaterCommand(command):
 		globalMode = "Temp"
 		tempRemaining = float(tempSplit[2])
 		modeZ1 = str(tempSplit[1])[:-1]
+		modeZ2 = str(tempSplit[1])[:-1]
+		modeZ3 = str(tempSplit[1])[:-1]
 		StartTempModeThread()
 	
 	elif command.endswith("1"):
@@ -76,12 +113,12 @@ def SetHeaterCommand(command):
 	elif command.endswith("2"):
 		modeZ2 = str(command)[:-1]
 		globalMode = "Manual"
-		#SendState(state)
+		SendState(command)
 
 	elif command.endswith("3"):
 		modeZ3 = str(command)[:-1]
 		globalMode = "Manual"
-		#SendState(state)
+		#SendState(command)
 
 	elif (command == "Auto"):
 		globalMode = "Auto"
@@ -117,6 +154,7 @@ def UpdateHeatersStates():
 	global modeZ1
 	global modeZ2
 	global modeZ3
+	global season
 
 	if (globalMode == "Auto"):
 	
@@ -128,6 +166,9 @@ def UpdateHeatersStates():
 			modeZ1 = "Moon"
 			SendX2DCommand("Moon"+"1")
 			SendX2DCommand("On1")
+
+			SendX2DCommand("Moon"+"2")
+			SendX2DCommand("On2")
 				
 		else:
 		
@@ -139,7 +180,12 @@ def UpdateHeatersStates():
 			dayNames=['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
 			stateNames=['Moon','Sun']
 
-			with open('/home/osmc/Conde_Home_Automation/chauffage.csv', 'rt') as f:
+			if (season == "Summer"):
+				csvFile = "/home/osmc/Conde_Home_Automation/chauffage-summer.csv"
+			else:
+				csvFile = "/home/osmc/Conde_Home_Automation/chauffage.csv"
+
+			with open(csvFile, 'rt') as f:
 				reader = csv.reader(f, delimiter=';', quotechar='"', quoting=csv.QUOTE_ALL)
 				for row in reader:
 					# print row
@@ -188,14 +234,14 @@ def UpdateHeatersStates():
 			SendX2DCommand(stat1+"1")
 			SendX2DCommand("On1")
 
-			# modeZ2 = stat2+"2"
-			# SendX2DCommand(stat2+"2")
-			# SendX2DCommand("On2")
+			modeZ2 = stat2
+			SendX2DCommand(stat2+"2")
+			SendX2DCommand("On2")
 
 	else:
 		logging.info("Heaters are NOT in auto mode (manual or Temporary Mode). Refreshing manual States")
 		SendState(modeZ1+"1")
-		# SendState(modeZ2+"2")
+		SendState(modeZ2+"2")
 		# SendState(modeZ3+"3")
 
 def SendX2DCommandThread():
@@ -211,6 +257,7 @@ def SendX2DCommandQueue(q):
 		logging.info("X2D Command Queue waiting ...")
 		command = q.get()
 		logging.info("X2D Command in queue : "+command)
+		SaveHeaterStatesToFile()
 		logging.info("Opening Serial Port")
 		
 		try:
@@ -225,7 +272,7 @@ def SendX2DCommandQueue(q):
 				ser.dtr = False
 			else:
 				ser = serial.Serial(
-					port='/dev/ttyUSB0',
+					port='/dev/USB868',
 					baudrate=9600
 				)
 				
